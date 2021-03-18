@@ -12,23 +12,23 @@ public class ValueBean {
 	private int oil = 0;
 	private int volts = 0;
 	private String belt = "00";
-	private String abs = "0F";
+	private int abs = 0;
 	private String lowoil = "00";
 	
 	// Cruise: 0 = off, 1 = Cruise, 2 = Cruise + SET
 	private String cruise = "00";
 	
 	// 0 off, 1 on, 2 slow flash, 3 fast flash (AT + MIL only)
-	private String vdcoff = "06";
+	private String vdcoff = "00";
 	private String awd = "00";
 	private String atoil = "00";
-	private String mil = "A0";
+	private String mil = "40";
 	
 	// Fuel - 0-100 (a percentage).  100% = full, 0% = empty
-	private int fuel = 0;
+	private int fuel = 100;
 	
 	// Gear - P, R, N, E, -, 1-4, D
-	private String gear = "70";
+	private String gear = "0E10";
 	
 	// Temp - C (cold), N (normal), H (hot)
 	private String temp = "00";
@@ -37,10 +37,10 @@ public class ValueBean {
 		
 		switch (a) {
 			case 0:
-				vdcoff="06";
+				vdcoff="00";
 				break;
 			case 1:
-				vdcoff="0F";
+				vdcoff="0A";
 				break;
 
 			default:
@@ -53,26 +53,34 @@ public class ValueBean {
 	}
 	
 	public void setOil(int a) {
-		oil=a;
+		if (oil != 0) {
+			oil = 2;
+		} else {
+			oil = 0;
+		}
 	}
 	
-	public int returnOil() {
-		return oil;
+	public String returnOil() {
+		return Integer.toString(oil);
 	}
 	
 	public void setVolts(int a) {
-		volts=a;
+		if (a == 1) {
+			volts = 4;
+		} else {
+			volts = 0;
+		}
 	}
 	
-	public int returnVolts() {
-		return volts;
+	public String returnVolts() {
+		return Integer.toString(volts + abs);
 	}
 	
 	public void setBelt(int a) {
 		if (a == 0) {
 			belt="00";
 		} else {
-			belt="10";
+			belt="40";
 		}
 	}
 	
@@ -80,16 +88,18 @@ public class ValueBean {
 		return belt;
 	}
 	
+	// In Gen6, VDC and ABS uses the same byte.  Using volts placeholder for VDC
+	// as conversion from Gen5 combination meters.
 	public void setAbs(int a) {
 		if (a == 0) {
-			abs="0F";
+			abs = 0;
 		} else {
-			abs="FF";
+			abs = 2;
 		}
 	}
 	
 	public String returnAbs() {
-		return abs;
+		return Integer.toString(volts + abs);
 	}
 	
 	public void setCruise(int a) {
@@ -99,10 +109,10 @@ public class ValueBean {
 				cruise="00";
 				break;
 			case 1:
-				cruise="EF";
+				cruise="10";
 				break;
 			case 2:
-				cruise="FA";
+				cruise="30";
 				break;
 				
 			default:
@@ -131,16 +141,16 @@ public class ValueBean {
 		
 		switch (a) {
 			case 0:
-				atoil="00";
+				atoil="0";
 				break;
 			case 1:
-				atoil="01";
+				atoil="4";
 				break;
 			case 2:
-				atoil="02";
+				atoil="8";
 				break;
 			case 3:
-				atoil="03";
+				atoil="C";
 				break;
 				
 			default:
@@ -158,13 +168,13 @@ public class ValueBean {
 		
 		switch (a) {
 			case 0:
-				awd="00";
+				awd="0";
 				break;
 			case 1:
-				awd="02";
+				awd="4";
 				break;
 			case 2:
-				awd="04";
+				awd="8";
 				break;
 				
 			default:
@@ -181,16 +191,16 @@ public class ValueBean {
 		
 		switch (a) {
 			case 0:
-				mil="90";
+				mil="20";
 				break;
 			case 1:
-				mil="00";
+				mil="10";
 				break;
 			case 2:
-				mil="B0";
+				mil="80";
 				break;
 			case 3:
-				mil="A0";
+				mil="40";
 				break;
 				
 			default:
@@ -239,40 +249,46 @@ public class ValueBean {
 	
 	public void setGear(char a) {
 		switch (a){
-		
+		//148#8B20000000000020
 		case 'p': 
-			gear="70";
+			gear="0E10";
 			break;
 		case 'r': 
-			gear="60";
+			gear="0D10";
 			break;
 		case 'n':	
-			gear="50";
+			gear="0C10";
 			break;
-		case 'e': 
-			gear="66";
+		case 'l': 
+			gear="0A10";
 			break;
 		case 'd': 
-			gear="40";
+			gear="0B10";
 			break;
 		case '1': 
-			gear="61";
+			gear="1B20";
 			break;
 		case '2': 
-			gear="62";
+			gear="2B20";
 			break;
 		case '3': 
-			gear="63";
+			gear="3B20";
 			break;
 		case '4': 
-			gear="64";
+			gear="4B20";
 			break;
 		case '5': 
-			gear="65";
+			gear="6B20";
 			break;
 		case '6': 
-			gear="59";
+			gear="6B20";
 			break;
+		case '7': 
+			gear="7B20";
+			break;
+		case '8': 
+			gear="8B20";
+			break;	
 		
 		default:
 			throw new IllegalArgumentException();
@@ -296,7 +312,7 @@ public class ValueBean {
 	}
 	
 	public void setTach(int a) {
-		if (a >= 0 && a <= 88){
+		if (a >= 0 && a <= 80){
 			tach=a;
 		} else {
 			throw new IllegalArgumentException();
